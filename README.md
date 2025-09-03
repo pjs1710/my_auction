@@ -1,4 +1,4 @@
-<img width="2310" height="1113" alt="image" src="https://github.com/user-attachments/assets/ee22ab3f-9a14-4294-b40a-8e38664faee9" /># 💰 실시간 경매 서비스
+# 💰 실시간 경매 서비스
 
 판매자가 경매에 상품을 등록하고, 다른 사용자가 입찰을 통해 경쟁하며 실시간으로 가격 변동/낙찰 여부를 알림으로 받는 서비스입니다.
 
@@ -102,7 +102,7 @@
 ---
 
 ## ERD
-
+<img width="2310" height="1113" alt="image" src="https://github.com/user-attachments/assets/ee22ab3f-9a14-4294-b40a-8e38664faee9" />
 
 
 
