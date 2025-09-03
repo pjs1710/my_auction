@@ -101,7 +101,8 @@
 ---
 
 ## ERD
-<img width="2310" height="1113" alt="image" src="https://github.com/user-attachments/assets/ee22ab3f-9a14-4294-b40a-8e38664faee9" />
+<img width="1619" height="861" alt="image" src="https://github.com/user-attachments/assets/a30e201c-43d5-43d3-ad2a-66e24dbd9508" />
+
 
 
 
