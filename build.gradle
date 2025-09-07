@@ -39,6 +39,9 @@ dependencies {
 
 	// JDBC 드라이버 의존성 추가
 	runtimeOnly 'com.mysql:mysql-connector-j'
+
+	// Spring Security 의존성 추가 (PasswordEncoder 사용)
+	implementation 'org.springframework.boot:spring-boot-starter-security'
 }
 
 tasks.named('test') {
