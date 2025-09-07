@@ -42,6 +42,9 @@ dependencies {
 
 	// Spring Security 의존성 추가 (PasswordEncoder 사용)
 	implementation 'org.springframework.boot:spring-boot-starter-security'
+
+	// Test용 H2 DB 의존성 추가
+	testImplementation 'com.h2database:h2'
 }
 
 tasks.named('test') {
