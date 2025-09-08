@@ -1,4 +1,4 @@
-package my.auction.global.util;
+package my.auction.global.component;
 
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class RedisUtil {
+public class RedisComponent {
 	
 	private final StringRedisTemplate stringRedisTemplate;
 	
@@ -37,15 +37,13 @@ public class RedisUtil {
 	}
 	
 	// 이메일 인증 완료 여부 확인 (회원가입 시 사용)
-	public boolean isEmailVerified(String email) {
-		String verifiedKey = email;
+	public boolean isEmailVerified(String verifiedKey) {
 		String verified = getData(verifiedKey);
 		return "true".equals(verified);
 	}
 	
 	// 이메일 인증 완료 정보 삭제 (회원가입 완료 후 사용)
-	public void clearEmailVerification(String email) {
-		String verifiedKey = email;
+	public void clearEmailVerification(String verifiedKey) {
 		deleteData(verifiedKey);
 	}
 }

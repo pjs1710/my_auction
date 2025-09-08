@@ -1,9 +1,8 @@
 package my.auction.email.service;
 
-import java.time.LocalDateTime;
 import java.util.Random;
 import lombok.RequiredArgsConstructor;
-import my.auction.global.util.RedisUtil;
+import my.auction.global.component.RedisComponent;
 import my.auction.user.service.UserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
@@ -21,7 +20,7 @@ public class MailServiceImpl implements MailService {
 	//* TODO : Custom Exception 클래스 구현하기
 	
 	private final JavaMailSender javaMailSender;
-	private final RedisUtil redisUtil;
+	private final RedisComponent redisComponent;
 	private final UserService userService;
 	
 	@Value("${spring.mail.sender}")
@@ -42,16 +41,13 @@ public class MailServiceImpl implements MailService {
 	@Override
 	public void sendVerificationCode(String email) {
 		try {
-			if (userService.isUserExists(email)) {
-				if (userService.isEmailVerified(email)) {
-					throw new Exception("이미 인증된 이메일입니다. " + email);
-				}
+			if (userService.isUserExists(email) && userService.isEmailVerified(email)) {
+				throw new Exception("이미 인증된 이메일입니다. " + email);
 			}
 			
 			String verificationCode = generateVerificationCode();
-			String redisKey = email;
 			
-			redisUtil.setDataExpire(redisKey, verificationCode, EXPIRE_TIME); // 만료시간 5분 설정
+			redisComponent.setDataExpire(email, verificationCode, EXPIRE_TIME); // 만료시간 5분 설정
 			sendEmail(email, verificationCode);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -71,7 +67,7 @@ public class MailServiceImpl implements MailService {
 			String trimmedEmail = email.trim();
 			String trimmedCode = code.trim();
 			String redisKey = trimmedEmail;
-			String storedCode = redisUtil.getData(redisKey);
+			String storedCode = redisComponent.getData(redisKey);
 			
 			if (storedCode == null) {
 				return false;
@@ -79,9 +75,9 @@ public class MailServiceImpl implements MailService {
 			
 			String trimmedStoredCode = storedCode.trim();
 			if (trimmedStoredCode.equals(trimmedCode)) {
-				redisUtil.deleteData(redisKey);
+				redisComponent.deleteData(redisKey);
 				String verifiedKey = trimmedEmail;
-				redisUtil.setDataExpire(verifiedKey, "true", VERIFIED_EXPIRE_TIME);
+				redisComponent.setDataExpire(verifiedKey, "true", VERIFIED_EXPIRE_TIME);
 				/*
 				 - 인증 완료 표시로 true로 값을 세팅하기.
 				 - 인증 후 60분동안 회원 가입을 마무리 해야됨.
