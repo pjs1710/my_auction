@@ -2,8 +2,10 @@ package my.auction.email.service;
 
 import java.util.Random;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import my.auction.email.exception.EmailErrorCode;
 import my.auction.global.component.RedisComponent;
-import my.auction.user.service.UserService;
+import my.auction.global.exception.RestApiException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
@@ -12,16 +14,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class MailServiceImpl implements MailService {
-
-	//* TODO : Custom Exception 클래스 구현하기
 	
 	private final JavaMailSender javaMailSender;
 	private final RedisComponent redisComponent;
-	private final UserService userService;
 	
 	@Value("${spring.mail.sender}")
 	private String senderMail;
@@ -42,55 +42,27 @@ public class MailServiceImpl implements MailService {
 	
 	@Override
 	public void sendVerificationCode(String email) {
-		try {
-			if (userService.isUserExists(email) && userService.isEmailVerified(email)) {
-				throw new Exception("이미 인증된 이메일입니다. " + email);
-			}
+		String verificationCode = generateVerificationCode();
 			
-			String verificationCode = generateVerificationCode();
-			
-			redisComponent.setDataExpire(VERIFICATION_CODE_PREFIX + email, verificationCode, EXPIRE_TIME); // 만료시간 5분 설정
-			sendEmail(email, verificationCode);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
+		redisComponent.setDataExpire(VERIFICATION_CODE_PREFIX + email, verificationCode, EXPIRE_TIME); // 만료시간 5분 설정
+		sendEmail(email, verificationCode);
 	}
 	
 	@Override
 	public boolean verifyCode(String email, String code) {
-		try {
-			if (email == null || code == null) {
-				return false;
-			}
-			
-			// 사용자가 실수로 공백을 입력할 수도 있음!
-			// 공백을 제거해서 혹시 모를 오류를 방지하기
-			String trimmedEmail = email.trim();
-			String trimmedCode = code.trim();
-			String redisKey = trimmedEmail;
-			String storedCode = redisComponent.getData(redisKey);
-			
-			if (storedCode == null) {
-				return false;
-			}
-			
-			String trimmedStoredCode = storedCode.trim();
-			if (trimmedStoredCode.equals(trimmedCode)) {
-				redisComponent.deleteData(redisKey);
-				String verifiedKey = VERIFIED_EMAIL_PREFIX + trimmedEmail;
-				redisComponent.setDataExpire(verifiedKey, "true", VERIFIED_EXPIRE_TIME);
-				/*
-				 - 인증 완료 표시로 true로 값을 세팅하기.
-				 - 인증 후 60분동안 회원 가입을 마무리 해야됨.
-				 */
-				
-				return true;
-			}
-			return false;
-		} catch (Exception e) {
-			return false;
+		String storedCode = redisComponent.getData(VERIFICATION_CODE_PREFIX + email);
+		
+		if (storedCode == null) {
+			throw new RestApiException(EmailErrorCode.CODE_EXPIRED);
 		}
+		if (!storedCode.equals(code)) {
+			throw new RestApiException(EmailErrorCode.CODE_MISMATCH);
+		}
+		
+		// 인증 성공 처리
+		redisComponent.deleteData(VERIFICATION_CODE_PREFIX + email);
+		redisComponent.setDataExpire(VERIFIED_EMAIL_PREFIX + email, "true", VERIFIED_EXPIRE_TIME);
+		return true;
 	}
 	
 	@Override
@@ -113,7 +85,7 @@ public class MailServiceImpl implements MailService {
 			mailMessage.setText(message);
 			javaMailSender.send(mailMessage);
 		} catch (MailException e) {
-			throw new RuntimeException(e);
+			throw new RestApiException(EmailErrorCode.EMAIL_SEND_FAILED);
 		}
 	}
 	

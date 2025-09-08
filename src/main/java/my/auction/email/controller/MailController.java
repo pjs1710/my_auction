@@ -41,13 +41,8 @@ public class MailController {
 	 */
 	@PostMapping("/check")
 	public ResponseEntity<?> isCodeValid(@Valid @RequestBody MailVerifyRequestDto requestDto) {
-		boolean isVerified = mailService.verifyCode(requestDto.getEmail(), requestDto.getCode()); // 인증 유무 확인
+		mailService.verifyCode(requestDto.getEmail(), requestDto.getCode()); // 인증 유무 확인
 		
-		if (isVerified) {
-			return ResponseEntity.ok(new MailVerifyResponseDto(true, "이메일 인증이 정상적으로 완료되었습니다!"));
-		} else {
-			return ResponseEntity.badRequest()
-				.body(new MailVerifyResponseDto(false, "인증 코드가 만료되었거나 일치하지 않습니다."));
-		}
+		return ResponseEntity.ok(new MailVerifyResponseDto(true, "이메일 인증이 정상적으로 완료되었습니다!"));
 	}
 }
