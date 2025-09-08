@@ -4,11 +4,10 @@ import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDateTime;
-import my.auction.global.util.RedisUtil;
+import my.auction.global.component.RedisComponent;
 import my.auction.user.domain.User;
 import my.auction.user.dto.UserRegisterRequestDto;
 import my.auction.user.repository.UserRepository;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,7 +28,7 @@ class UserServiceImplTest {
 	private UserService userService;
 	
 	@Autowired
-	private RedisUtil redisUtil;
+	private RedisComponent redisComponent;
 	
 	private String testEmail = "test1234@naver.com";
 	private String testPassword = "test1234";
@@ -81,7 +80,7 @@ class UserServiceImplTest {
 		User testUser = User.builder()
 			.email(testEmail)
 			.password(testPassword)
-			.email_verified_time(LocalDateTime.now())
+			.emailVerifiedTime(LocalDateTime.now())
 			.build();
 		userRepository.saveAndFlush(testUser);
 		
@@ -127,7 +126,7 @@ class UserServiceImplTest {
 	@DisplayName("회원가입 - Success")
 	void registerUser_성공() {
 		// given
-		redisUtil.setDataExpire(testEmail, "true", 5); // 인증된 걸로 임시 처리!
+		redisComponent.setDataExpire(testEmail, "true", 5); // 인증된 걸로 임시 처리!
 		
 		UserRegisterRequestDto requestDto = UserRegisterRequestDto.builder()
 			.email(testEmail)
@@ -150,7 +149,7 @@ class UserServiceImplTest {
 		User alreadyRegisterEmail = User.builder()
 			.email(testEmail)
 			.password(testPassword)
-			.email_verified_time(LocalDateTime.now())
+			.emailVerifiedTime(LocalDateTime.now())
 			.build();
 		userRepository.saveAndFlush(alreadyRegisterEmail);
 		
