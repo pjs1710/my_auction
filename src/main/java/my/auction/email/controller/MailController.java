@@ -25,7 +25,7 @@ public class MailController {
 	 * @param requestDto
 	 * @return
 	 */
-	@PostMapping("/send")
+	@PostMapping
 	public ResponseEntity<?> sendVerificationCode(
 		@Valid @RequestBody MailSendRequestDto requestDto) {
 		mailService.sendVerificationCode(requestDto.getEmail());
@@ -40,7 +40,7 @@ public class MailController {
 	 * @return
 	 */
 	@PostMapping("/check")
-	public ResponseEntity<?> verifyCode(@Valid @RequestBody MailVerifyRequestDto requestDto) {
+	public ResponseEntity<?> isCodeValid(@Valid @RequestBody MailVerifyRequestDto requestDto) {
 		boolean isVerified = mailService.verifyCode(requestDto.getEmail(), requestDto.getCode()); // 인증 유무 확인
 		
 		if (isVerified) {
