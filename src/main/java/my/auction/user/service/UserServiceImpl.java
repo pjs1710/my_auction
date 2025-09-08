@@ -2,6 +2,7 @@ package my.auction.user.service;
 
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
+import my.auction.email.service.MailService;
 import my.auction.global.component.RedisComponent;
 import my.auction.user.domain.User;
 import my.auction.user.dto.UserRegisterRequestDto;
@@ -16,8 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserServiceImpl implements UserService {
 	
 	private final UserRepository userRepository;
-	private final RedisComponent redisComponent;
 	private final PasswordEncoder passwordEncoder;
+	private final MailService mailService;
 	
 	@Override
 	@Transactional(readOnly = true)
@@ -51,8 +52,7 @@ public class UserServiceImpl implements UserService {
 		if (userRepository.existsByEmail(email)) {
 			throw new IllegalArgumentException("이미 사용 중인 email 입니다.");
 		}
-		String redisKey = email;
-		if (!redisComponent.isEmailVerified(redisKey)) {
+		if (!mailService.isEmailVerified(email)) {
 			throw new IllegalStateException("이메일 인증을 완료하지 않았습니다.");
 		}
 		
@@ -64,6 +64,6 @@ public class UserServiceImpl implements UserService {
 			.emailVerifiedTime(LocalDateTime.now()) // 인증이 최종적으로 완료된 후, 회원 등록 시각을 저장해놓기!
 			.build();
 		userRepository.save(user);
-		redisComponent.deleteData(redisKey);
+		mailService.clearEmailVerification(email);
 	}
 }

@@ -28,6 +28,8 @@ public class MailServiceImpl implements MailService {
 	
 	private static final long EXPIRE_TIME = 5; // 5분
 	private static final long VERIFIED_EXPIRE_TIME = 60; // 인증 완료 정보는 60분 유지
+	private static final String VERIFICATION_CODE_PREFIX = "Verification_Code:"; // 인증 코드 전송됐을 때의 Key Prefix
+	private static final String VERIFIED_EMAIL_PREFIX = "Verified_Email:"; // 인증 완료됐을 때의 Key Prefix
 	
 	@Override
 	public void sendEmail(String to, String code) {
@@ -47,7 +49,7 @@ public class MailServiceImpl implements MailService {
 			
 			String verificationCode = generateVerificationCode();
 			
-			redisComponent.setDataExpire(email, verificationCode, EXPIRE_TIME); // 만료시간 5분 설정
+			redisComponent.setDataExpire(VERIFICATION_CODE_PREFIX + email, verificationCode, EXPIRE_TIME); // 만료시간 5분 설정
 			sendEmail(email, verificationCode);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -76,7 +78,7 @@ public class MailServiceImpl implements MailService {
 			String trimmedStoredCode = storedCode.trim();
 			if (trimmedStoredCode.equals(trimmedCode)) {
 				redisComponent.deleteData(redisKey);
-				String verifiedKey = trimmedEmail;
+				String verifiedKey = VERIFIED_EMAIL_PREFIX + trimmedEmail;
 				redisComponent.setDataExpire(verifiedKey, "true", VERIFIED_EXPIRE_TIME);
 				/*
 				 - 인증 완료 표시로 true로 값을 세팅하기.
@@ -89,6 +91,17 @@ public class MailServiceImpl implements MailService {
 		} catch (Exception e) {
 			return false;
 		}
+	}
+	
+	@Override
+	public boolean isEmailVerified(String email) {
+		String result = redisComponent.getData(VERIFIED_EMAIL_PREFIX + email);
+		return "true".equals(result);
+	}
+	
+	@Override
+	public void clearEmailVerification(String email) {
+		redisComponent.deleteData(VERIFIED_EMAIL_PREFIX + email);
 	}
 	
 	private void sendMessage(String to, String subject, String message) {

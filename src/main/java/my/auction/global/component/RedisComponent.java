@@ -35,15 +35,4 @@ public class RedisComponent {
 	public void deleteData(String key) {
 		stringRedisTemplate.delete(key);
 	}
-	
-	// 이메일 인증 완료 여부 확인 (회원가입 시 사용)
-	public boolean isEmailVerified(String verifiedKey) {
-		String verified = getData(verifiedKey);
-		return "true".equals(verified);
-	}
-	
-	// 이메일 인증 완료 정보 삭제 (회원가입 완료 후 사용)
-	public void clearEmailVerification(String verifiedKey) {
-		deleteData(verifiedKey);
-	}
 }
