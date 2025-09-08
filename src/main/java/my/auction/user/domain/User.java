@@ -38,5 +38,5 @@ public class User extends BaseEntity {
 	
 	@Column(name = "email_verified_time")
 	@Builder.Default
-	private LocalDateTime email_verified_time = null;
+	private LocalDateTime emailVerifiedTime = null;
 }
