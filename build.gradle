@@ -33,6 +33,18 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	// 이메일 인증 의존성 추가
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+	// JDBC 드라이버 의존성 추가
+	runtimeOnly 'com.mysql:mysql-connector-j'
+
+	// Spring Security 의존성 추가 (PasswordEncoder 사용)
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+
+	// Test용 H2 DB 의존성 추가
+	testImplementation 'com.h2database:h2'
 }
 
 tasks.named('test') {
